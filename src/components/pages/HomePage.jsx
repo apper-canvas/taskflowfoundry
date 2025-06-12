@@ -48,11 +48,11 @@ const HomePage = () => {
     }
   };
 
-  const handleTaskComplete = async (taskId, completed) => {
+const handleTaskComplete = async (taskId, completed) => {
     try {
       const updatedTask = await taskService.update(taskId, { completed });
       setTasks(prev => prev.map(task => 
-        task.id === taskId ? updatedTask : task
+        (task.Id || task.id) === taskId ? updatedTask : task
       ));
       
       if (completed) {
@@ -136,12 +136,11 @@ const HomePage = () => {
       case 'low': return 'bg-success';
       default: return 'bg-gray-400';
     }
-  };
+};
 
-const getCategoryColor = (categoryId) => {
+  const getCategoryColor = (categoryId) => {
     const category = categories.find(c => 
-      c.Id?.toString() === categoryId?.toString() || 
-      c.id?.toString() === categoryId?.toString()
+      (c.Id?.toString() || c.id?.toString()) === categoryId?.toString()
     );
     return category?.color || '#5B4EE5';
   };

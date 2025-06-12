@@ -69,10 +69,10 @@ const Sidebar = ({ tasks, categories, selectedCategory, onSelectCategory, comple
                             key={category.Id || category.id}
                             category={category}
                             count={tasks.filter(t => 
-                              (t.category_id?.toString() === (category.Id?.toString() || category.id?.toString())) ||
-                              (t.categoryId?.toString() === (category.Id?.toString() || category.id?.toString()))
+                              (t.category_id?.toString() === ((category.Id || category.id)?.toString())) ||
+                              (t.categoryId?.toString() === ((category.Id || category.id)?.toString()))
                             ).length}
-                            isSelected={selectedCategory === (category.Id?.toString() || category.id?.toString())}
+                            isSelected={selectedCategory === ((category.Id || category.id)?.toString())}
                             onClick={onSelectCategory}
                         />
                     ))}
