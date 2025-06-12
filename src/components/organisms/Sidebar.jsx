@@ -64,12 +64,15 @@ const Sidebar = ({ tasks, categories, selectedCategory, onSelectCategory, comple
                         onClick={onSelectCategory}
                     />
 
-                    {categories.map((category) => (
+{categories.map((category) => (
                         <CategoryButton
-                            key={category.id}
+                            key={category.Id || category.id}
                             category={category}
-                            count={tasks.filter(t => t.categoryId === category.id).length}
-                            isSelected={selectedCategory === category.id}
+                            count={tasks.filter(t => 
+                              (t.category_id?.toString() === (category.Id?.toString() || category.id?.toString())) ||
+                              (t.categoryId?.toString() === (category.Id?.toString() || category.id?.toString()))
+                            ).length}
+                            isSelected={selectedCategory === (category.Id?.toString() || category.id?.toString())}
                             onClick={onSelectCategory}
                         />
                     ))}

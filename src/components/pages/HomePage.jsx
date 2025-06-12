@@ -96,13 +96,16 @@ const HomePage = () => {
 
   const handleNewTaskChange = (field, value) => {
     setNewTask(prev => ({ ...prev, [field]: value }));
-  };
+};
 
   const getFilteredTasks = () => {
     let filtered = tasks;
 
     if (selectedCategory !== 'all') {
-      filtered = filtered.filter(task => task.categoryId === selectedCategory);
+      filtered = filtered.filter(task => 
+        task.category_id?.toString() === selectedCategory || 
+        task.categoryId?.toString() === selectedCategory
+      );
     }
 
     if (searchQuery) {
@@ -135,8 +138,11 @@ const HomePage = () => {
     }
   };
 
-  const getCategoryColor = (categoryId) => {
-    const category = categories.find(c => c.id === categoryId);
+const getCategoryColor = (categoryId) => {
+    const category = categories.find(c => 
+      c.Id?.toString() === categoryId?.toString() || 
+      c.id?.toString() === categoryId?.toString()
+    );
     return category?.color || '#5B4EE5';
   };
 

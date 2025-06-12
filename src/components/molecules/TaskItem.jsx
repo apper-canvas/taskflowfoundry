@@ -5,8 +5,14 @@ import Checkbox from '@/components/atoms/Checkbox';
 import Button from '@/components/atoms/Button';
 
 const TaskItem = ({ task, categories, onToggleComplete, onDelete, getPriorityColor, getCategoryColor, getDueDateDisplay, index }) => {
-    const dueDateInfo = getDueDateDisplay(task.dueDate);
-    const categoryName = categories.find(c => c.id === task.categoryId)?.name;
+const dueDateInfo = getDueDateDisplay(task.due_date || task.dueDate);
+    const categoryName = categories.find(c => 
+      (c.Id?.toString() === (task.category_id?.toString() || task.categoryId?.toString())) ||
+      (c.id?.toString() === (task.category_id?.toString() || task.categoryId?.toString()))
+    )?.Name || categories.find(c => 
+      (c.Id?.toString() === (task.category_id?.toString() || task.categoryId?.toString())) ||
+      (c.id?.toString() === (task.category_id?.toString() || task.categoryId?.toString()))
+    )?.name;
 
     return (
         <motion.div
@@ -41,9 +47,9 @@ const TaskItem = ({ task, categories, onToggleComplete, onDelete, getPriorityCol
                     <div className="flex items-center space-x-4 text-xs">
                         {/* Category */}
                         {categoryName && (
-                            <div 
+<div 
                                 className="px-2 py-1 rounded-full text-white text-xs font-medium"
-                                style={{ backgroundColor: getCategoryColor(task.categoryId) }}
+                                style={{ backgroundColor: getCategoryColor(task.category_id || task.categoryId) }}
                             >
                                 {categoryName}
                             </div>
