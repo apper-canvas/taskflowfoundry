@@ -66,13 +66,14 @@ const handleTaskComplete = async (taskId, completed) => {
     }
   };
 
-  const handleCreateTask = async (e) => {
+const handleCreateTask = async (e) => {
     e.preventDefault();
     if (!newTask.title.trim()) return;
 
     try {
       const task = await taskService.create({
         ...newTask,
+        categoryId: newTask.categoryId,
         dueDate: newTask.dueDate ? new Date(newTask.dueDate).toISOString() : null
       });
       setTasks(prev => [...prev, task]);
@@ -84,10 +85,10 @@ const handleTaskComplete = async (taskId, completed) => {
     }
   };
 
-  const handleDeleteTask = async (taskId) => {
+const handleDeleteTask = async (taskId) => {
     try {
       await taskService.delete(taskId);
-      setTasks(prev => prev.filter(task => task.id !== taskId));
+      setTasks(prev => prev.filter(task => (task.Id || task.id) !== taskId));
       toast.success('Task deleted');
     } catch (err) {
       toast.error('Failed to delete task');
@@ -101,7 +102,7 @@ const handleTaskComplete = async (taskId, completed) => {
   const getFilteredTasks = () => {
     let filtered = tasks;
 
-    if (selectedCategory !== 'all') {
+if (selectedCategory !== 'all') {
       filtered = filtered.filter(task => 
         task.category_id?.toString() === selectedCategory || 
         task.categoryId?.toString() === selectedCategory
@@ -138,7 +139,7 @@ const handleTaskComplete = async (taskId, completed) => {
     }
 };
 
-  const getCategoryColor = (categoryId) => {
+const getCategoryColor = (categoryId) => {
     const category = categories.find(c => 
       (c.Id?.toString() || c.id?.toString()) === categoryId?.toString()
     );

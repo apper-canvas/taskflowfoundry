@@ -4,7 +4,7 @@ import FormField from '@/components/molecules/FormField';
 import Button from '@/components/atoms/Button';
 
 const QuickAddTaskModal = ({ show, onClose, newTask, onNewTaskChange, categories, onSubmit }) => {
-    const categoryOptions = categories.map(cat => ({ value: cat.id, label: cat.name }));
+const categoryOptions = categories.map(cat => ({ value: cat.Id || cat.id, label: cat.Name || cat.name }));
     const priorityOptions = [
         { value: 'low', label: 'Low' },
         { value: 'medium', label: 'Medium' },

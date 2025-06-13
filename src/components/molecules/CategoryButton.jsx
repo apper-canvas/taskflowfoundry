@@ -18,7 +18,7 @@ const CategoryButton = ({ category, count, isSelected, onClick }) => {
                     className="w-3 h-3 rounded-full"
                     style={{ backgroundColor: category.color || '#5B4EE5' }}
                 ></div>
-                <span className="font-medium">{category.Name || category.name}</span>
+<span className="font-medium">{category.Name || category.name}</span>
             </div>
             <span className="text-xs opacity-75">{count}</span>
         </Button>
