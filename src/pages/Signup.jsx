@@ -13,12 +13,21 @@ function Signup() {
     }
   }, [isInitialized]);
   
-  return (
+return (
     <div className="flex min-h-screen items-center justify-center bg-surface-50 dark:bg-surface-900">
       <div className="w-full max-w-md space-y-8 p-6 bg-white dark:bg-surface-800 rounded-lg shadow-md">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-surface-800 dark:text-surface-100">Create Account</h1>
-          <p className="mt-2 text-surface-600 dark:text-surface-400">Sign up for your account</p>
+        <div className="flex flex-col gap-6 items-center justify-center">
+          <div className="w-14 h-14 shrink-0 rounded-xl flex items-center justify-center bg-gradient-to-r from-primary to-secondary text-white text-2xl 2xl:text-3xl font-bold">
+            T
+          </div>
+          <div className="flex flex-col gap-1 items-center justify-center">
+            <div className="text-center text-lg xl:text-xl font-bold">
+              Create Account
+            </div>
+            <div className="text-center text-sm text-gray-500">
+              Please create an account to continue
+            </div>
+          </div>
         </div>
         <div id="authentication" className="min-h-[400px]" />
         <div className="text-center mt-4">
