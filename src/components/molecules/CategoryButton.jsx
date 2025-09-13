@@ -4,7 +4,7 @@ import Button from '@/components/atoms/Button';
 const CategoryButton = ({ category, count, isSelected, onClick }) => {
     return (
         <Button
-            onClick={() => onClick(category.id)}
+onClick={() => onClick(category.Id || category.id)}
             className={`w-full flex items-center justify-between p-3 rounded-lg transition-all 
                 ${isSelected 
                     ? 'bg-primary text-white shadow-md' 

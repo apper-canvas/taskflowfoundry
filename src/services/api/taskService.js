@@ -1,3 +1,4 @@
+import React from "react";
 const { ApperClient } = window.ApperSDK;
 
 const apperClient = new ApperClient({
@@ -5,7 +6,7 @@ const apperClient = new ApperClient({
   apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
 });
 
-const taskService = {
+const testService = {
   async getAll() {
     try {
       const params = {
@@ -17,57 +18,86 @@ const taskService = {
           },
           {
             "Field": {
-              "Name": "title"
+              "Name": "Name"
             }
           },
           {
             "Field": {
-              "Name": "completed"
+              "Name": "Tags"
             }
           },
           {
             "Field": {
-              "Name": "category_id"
+              "Name": "Description"
             }
           },
           {
             "Field": {
-              "Name": "priority"
+              "Name": "TestPrice"
             }
           },
           {
             "Field": {
-              "Name": "due_date"
+              "Name": "Owner"
             }
           },
           {
             "Field": {
-              "Name": "created_at"
+              "Name": "CreatedOn"
             }
           },
           {
             "Field": {
-              "Name": "completed_at"
+              "Name": "CreatedBy"
             }
           },
           {
             "Field": {
-              "Name": "order"
+              "Name": "ModifiedOn"
+            }
+          },
+          {
+            "Field": {
+              "Name": "ModifiedBy"
+            }
+          },
+          {
+            "Field": {
+              "Name": "files_5"
+            }
+          },
+          {
+            "Field": {
+              "Name": "files_6"
             }
           }
         ]
       };
       
-      const response = await apperClient.fetchRecords('task', params);
+      const response = await apperClient.fetchRecords('Test', params);
       
       if (!response.success) {
         console.error(response.message);
         throw new Error(response.message);
       }
       
-      return response.data || [];
+      // Transform Test records to work with existing UI
+      const transformedData = (response.data || []).map(record => ({
+        ...record,
+        // Map Test fields to expected task fields for UI compatibility
+        title: record.Name,
+        completed: record.Description?.includes('completed') || false,
+        category_id: record.Tags || 'general',
+        priority: record.Description?.includes('high') ? 'high' : record.Description?.includes('low') ? 'low' : 'medium',
+        due_date: record.ModifiedOn,
+        created_at: record.CreatedOn,
+        completed_at: record.Description?.includes('completed') ? record.ModifiedOn : null,
+        order: record.TestPrice || 0
+      }));
+      
+      return transformedData;
     } catch (error) {
-      console.error("Error fetching tasks:", error);
+      console.error("Error fetching test records:", error);
       throw error;
     }
   },
@@ -75,19 +105,71 @@ const taskService = {
   async getById(id) {
     try {
       const params = {
-        fields: ['Id', 'title', 'completed', 'category_id', 'priority', 'due_date', 'created_at', 'completed_at', 'order']
+        "Fields": [
+          {
+            "Field": {
+              "Name": "Id"
+            }
+          },
+          {
+            "Field": {
+              "Name": "Name"
+            }
+          },
+          {
+            "Field": {
+              "Name": "Tags"
+            }
+          },
+          {
+            "Field": {
+              "Name": "Description"
+            }
+          },
+          {
+            "Field": {
+              "Name": "TestPrice"
+            }
+          },
+          {
+            "Field": {
+              "Name": "files_5"
+            }
+          },
+          {
+            "Field": {
+              "Name": "files_6"
+            }
+          }
+        ]
       };
       
-      const response = await apperClient.getRecordById('task', id, params);
+      const response = await apperClient.getRecordById('Test', id, params);
       
       if (!response.success) {
         console.error(response.message);
         throw new Error(response.message);
       }
       
-      return response.data;
+      // Transform single Test record to work with existing UI
+      const record = response.data;
+      if (record) {
+        return {
+          ...record,
+          title: record.Name,
+          completed: record.Description?.includes('completed') || false,
+          category_id: record.Tags || 'general',
+          priority: record.Description?.includes('high') ? 'high' : record.Description?.includes('low') ? 'low' : 'medium',
+          due_date: record.ModifiedOn,
+          created_at: record.CreatedOn,
+          completed_at: record.Description?.includes('completed') ? record.ModifiedOn : null,
+          order: record.TestPrice || 0
+        };
+      }
+      
+      return record;
     } catch (error) {
-      console.error(`Error fetching task with ID ${id}:`, error);
+      console.error(`Error fetching test record with ID ${id}:`, error);
       throw error;
     }
   },
@@ -97,19 +179,18 @@ const taskService = {
       const params = {
         records: [
           {
-            title: taskData.title,
-            completed: taskData.completed || false,
-            category_id: parseInt(taskData.categoryId) || parseInt(taskData.category_id) || null,
-            priority: taskData.priority || 'medium',
-            due_date: taskData.dueDate || taskData.due_date || null,
-            created_at: taskData.createdAt || taskData.created_at || new Date().toISOString(),
-            completed_at: taskData.completedAt || taskData.completed_at || null,
-            order: taskData.order !== undefined ? taskData.order : 0
+            // Only include Updateable fields
+            Name: taskData.title || taskData.Name,
+            Tags: taskData.categoryId || taskData.Tags || 'general',
+            Description: `Priority: ${taskData.priority || 'medium'}${taskData.completed ? ' - completed' : ''}${taskData.dueDate ? ` - Due: ${taskData.dueDate}` : ''}`,
+            TestPrice: parseFloat(taskData.order || taskData.TestPrice || 0),
+            files_5: taskData.files_5 || '',
+            files_6: taskData.files_6 || ''
           }
         ]
       };
       
-      const response = await apperClient.createRecord('task', params);
+      const response = await apperClient.createRecord('Test', params);
       
       if (!response.success) {
         console.error(response.message);
@@ -122,49 +203,67 @@ const taskService = {
         
         if (failedRecords.length > 0) {
           console.error(`Failed to create ${failedRecords.length} records:${JSON.stringify(failedRecords)}`);
-          throw new Error(failedRecords[0].message || 'Failed to create task');
+          throw new Error(failedRecords[0].message || 'Failed to create test record');
         }
         
-        return successfulRecords[0].data;
+        // Transform response back to task format for UI compatibility
+        const created = successfulRecords[0].data;
+        return {
+          ...created,
+          title: created.Name,
+          completed: created.Description?.includes('completed') || false,
+          category_id: created.Tags,
+          priority: created.Description?.includes('high') ? 'high' : created.Description?.includes('low') ? 'low' : 'medium',
+          order: created.TestPrice
+        };
       }
       
       throw new Error('Unexpected response format');
     } catch (error) {
-      console.error("Error creating task:", error);
+      console.error("Error creating test record:", error);
       throw error;
     }
   },
 
   async update(id, updateData) {
     try {
-      const params = {
-        records: [
-          {
-            Id: parseInt(id),
-            ...(updateData.title !== undefined && { title: updateData.title }),
-            ...(updateData.completed !== undefined && { completed: updateData.completed }),
-            ...(updateData.categoryId !== undefined && { category_id: parseInt(updateData.categoryId) }),
-            ...(updateData.category_id !== undefined && { category_id: parseInt(updateData.category_id) }),
-            ...(updateData.priority !== undefined && { priority: updateData.priority }),
-            ...(updateData.dueDate !== undefined && { due_date: updateData.dueDate }),
-            ...(updateData.due_date !== undefined && { due_date: updateData.due_date }),
-            ...(updateData.createdAt !== undefined && { created_at: updateData.createdAt }),
-            ...(updateData.created_at !== undefined && { created_at: updateData.created_at }),
-            ...(updateData.completedAt !== undefined && { completed_at: updateData.completedAt }),
-            ...(updateData.completed_at !== undefined && { completed_at: updateData.completed_at }),
-            ...(updateData.order !== undefined && { order: updateData.order })
-          }
-        ]
+      const record = {
+        Id: parseInt(id)
       };
       
-      // Handle completion timestamp logic
-      if (updateData.completed && !updateData.completed_at && !updateData.completedAt) {
-        params.records[0].completed_at = new Date().toISOString();
-      } else if (updateData.completed === false) {
-        params.records[0].completed_at = null;
+      // Only include Updateable fields that are being updated
+      if (updateData.title !== undefined || updateData.Name !== undefined) {
+        record.Name = updateData.title || updateData.Name;
       }
       
-      const response = await apperClient.updateRecord('task', params);
+      if (updateData.categoryId !== undefined || updateData.Tags !== undefined) {
+        record.Tags = updateData.categoryId || updateData.Tags;
+      }
+      
+      if (updateData.completed !== undefined || updateData.priority !== undefined || updateData.Description !== undefined) {
+        // Preserve existing description structure while updating completion/priority
+        const priority = updateData.priority || 'medium';
+        const completed = updateData.completed !== undefined ? updateData.completed : false;
+        record.Description = `Priority: ${priority}${completed ? ' - completed' : ''}`;
+      }
+      
+      if (updateData.order !== undefined || updateData.TestPrice !== undefined) {
+        record.TestPrice = parseFloat(updateData.order || updateData.TestPrice);
+      }
+      
+      if (updateData.files_5 !== undefined) {
+        record.files_5 = updateData.files_5;
+      }
+      
+      if (updateData.files_6 !== undefined) {
+        record.files_6 = updateData.files_6;
+      }
+      
+      const params = {
+        records: [record]
+      };
+      
+      const response = await apperClient.updateRecord('Test', params);
       
       if (!response.success) {
         console.error(response.message);
@@ -177,15 +276,24 @@ const taskService = {
         
         if (failedUpdates.length > 0) {
           console.error(`Failed to update ${failedUpdates.length} records:${JSON.stringify(failedUpdates)}`);
-          throw new Error(failedUpdates[0].message || 'Failed to update task');
+          throw new Error(failedUpdates[0].message || 'Failed to update test record');
         }
         
-        return successfulUpdates[0].data;
+        // Transform response back to task format for UI compatibility
+        const updated = successfulUpdates[0].data;
+        return {
+          ...updated,
+          title: updated.Name,
+          completed: updated.Description?.includes('completed') || false,
+          category_id: updated.Tags,
+          priority: updated.Description?.includes('high') ? 'high' : updated.Description?.includes('low') ? 'low' : 'medium',
+          order: updated.TestPrice
+        };
       }
       
       throw new Error('Unexpected response format');
     } catch (error) {
-      console.error("Error updating task:", error);
+      console.error("Error updating test record:", error);
       throw error;
     }
   },
@@ -196,7 +304,7 @@ const taskService = {
         RecordIds: [parseInt(id)]
       };
       
-      const response = await apperClient.deleteRecord('task', params);
+      const response = await apperClient.deleteRecord('Test', params);
       
       if (!response.success) {
         console.error(response.message);
@@ -209,7 +317,7 @@ const taskService = {
         
         if (failedDeletions.length > 0) {
           console.error(`Failed to delete ${failedDeletions.length} records:${JSON.stringify(failedDeletions)}`);
-          throw new Error(failedDeletions[0].message || 'Failed to delete task');
+          throw new Error(failedDeletions[0].message || 'Failed to delete test record');
         }
         
         return true;
@@ -217,7 +325,7 @@ const taskService = {
       
       return true;
     } catch (error) {
-      console.error("Error deleting task:", error);
+      console.error("Error deleting test record:", error);
       throw error;
     }
   },
@@ -226,7 +334,7 @@ const taskService = {
     try {
       return await this.update(taskId, { order: newOrder });
     } catch (error) {
-      console.error("Error reordering task:", error);
+      console.error("Error reordering test record:", error);
       throw error;
     }
   },
@@ -242,64 +350,66 @@ const taskService = {
           },
           {
             "Field": {
-              "Name": "title"
+              "Name": "Name"
             }
           },
           {
             "Field": {
-              "Name": "completed"
+              "Name": "Tags"
             }
           },
           {
             "Field": {
-              "Name": "category_id"
+              "Name": "Description"
             }
           },
           {
             "Field": {
-              "Name": "priority"
+              "Name": "TestPrice"
             }
           },
           {
             "Field": {
-              "Name": "due_date"
+              "Name": "CreatedOn"
             }
           },
           {
             "Field": {
-              "Name": "created_at"
-            }
-          },
-          {
-            "Field": {
-              "Name": "completed_at"
-            }
-          },
-          {
-            "Field": {
-              "Name": "order"
+              "Name": "ModifiedOn"
             }
           }
         ],
         "where": [
           {
-            "FieldName": "category_id",
-            "Operator": "ExactMatch",
+            "FieldName": "Tags",
+            "Operator": "Contains",
             "Values": [categoryId.toString()]
           }
         ]
       };
       
-      const response = await apperClient.fetchRecords('task', params);
+      const response = await apperClient.fetchRecords('Test', params);
       
       if (!response.success) {
         console.error(response.message);
         throw new Error(response.message);
       }
       
-      return response.data || [];
+      // Transform Test records to work with existing UI
+      const transformedData = (response.data || []).map(record => ({
+        ...record,
+        title: record.Name,
+        completed: record.Description?.includes('completed') || false,
+        category_id: record.Tags,
+        priority: record.Description?.includes('high') ? 'high' : record.Description?.includes('low') ? 'low' : 'medium',
+        due_date: record.ModifiedOn,
+        created_at: record.CreatedOn,
+        order: record.TestPrice || 0
+      }));
+      
+      return transformedData;
     } catch (error) {
-      console.error("Error fetching tasks by category:", error);
+      console.error("Error fetching test records by category:", error);
       throw error;
     }
   },
@@ -315,66 +425,69 @@ const taskService = {
           },
           {
             "Field": {
-              "Name": "title"
+              "Name": "Name"
             }
           },
           {
             "Field": {
-              "Name": "completed"
+              "Name": "Tags"
             }
           },
           {
             "Field": {
-              "Name": "category_id"
+              "Name": "Description"
             }
           },
           {
             "Field": {
-              "Name": "priority"
+              "Name": "TestPrice"
             }
           },
           {
             "Field": {
-              "Name": "due_date"
+              "Name": "CreatedOn"
             }
           },
           {
             "Field": {
-              "Name": "created_at"
-            }
-          },
-          {
-            "Field": {
-              "Name": "completed_at"
-            }
-          },
-          {
-            "Field": {
-              "Name": "order"
+              "Name": "ModifiedOn"
             }
           }
         ],
         "where": [
           {
-            "FieldName": "title",
+            "FieldName": "Name",
             "Operator": "Contains",
             "Values": [query]
           }
         ]
       };
       
-      const response = await apperClient.fetchRecords('task', params);
+      const response = await apperClient.fetchRecords('Test', params);
       
       if (!response.success) {
         console.error(response.message);
         throw new Error(response.message);
       }
       
-      return response.data || [];
+      // Transform Test records to work with existing UI
+      const transformedData = (response.data || []).map(record => ({
+        ...record,
+        title: record.Name,
+        completed: record.Description?.includes('completed') || false,
+        category_id: record.Tags,
+        priority: record.Description?.includes('high') ? 'high' : record.Description?.includes('low') ? 'low' : 'medium',
+        due_date: record.ModifiedOn,
+        created_at: record.CreatedOn,
+        order: record.TestPrice || 0
+      }));
+      
+      return transformedData;
     } catch (error) {
-      console.error("Error searching tasks:", error);
+      console.error("Error searching test records:", error);
       throw error;
     }
   }
 };
-export default taskService;
+
+export default testService;

@@ -27,7 +27,7 @@ const dueDateInfo = getDueDateDisplay(task.due_date || task.dueDate);
         >
             <div className="flex items-center space-x-4">
                 {/* Checkbox */}
-                <Checkbox checked={task.completed} onClick={() => onToggleComplete(task.id, !task.completed)} />
+<Checkbox checked={task.completed} onClick={() => onToggleComplete(task.Id || task.id, !task.completed)} />
 
                 {/* Task Content */}
                 <div className="flex-1 min-w-0">
@@ -68,7 +68,8 @@ const dueDateInfo = getDueDateDisplay(task.due_date || task.dueDate);
                 </div>
 
                 {/* Actions */}
-                <Button
+<Button
+                    onClick={() => onDelete(task.Id || task.id)}
                     onClick={() => onDelete(task.id)}
                     className="p-2 text-gray-400 hover:text-error transition-colors"
                     whileHover={{ scale: 1.1 }}

@@ -1,18 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { toast } from 'react-toastify';
-import { format, isToday, isPast, isTomorrow } from 'date-fns';
-import ApperIcon from '@/components/ApperIcon';
-import { taskService, categoryService } from '@/services';
+import React, { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { toast } from "react-toastify";
+import { format, isPast, isToday, isTomorrow } from "date-fns";
+import { categoryService, taskService } from "@/services";
+import ApperIcon from "@/components/ApperIcon";
+import Button from "@/components/atoms/Button";
+import MainContentHeader from "@/components/organisms/MainContentHeader";
+import QuickAddTaskModal from "@/components/organisms/QuickAddTaskModal";
+import Sidebar from "@/components/organisms/Sidebar";
+import TaskListSection from "@/components/organisms/TaskListSection";
 
-import Sidebar from '@/components/organisms/Sidebar';
-import MainContentHeader from '@/components/organisms/MainContentHeader';
-import TaskListSection from '@/components/organisms/TaskListSection';
-import QuickAddTaskModal from '@/components/organisms/QuickAddTaskModal';
-import Button from '@/components/atoms/Button';
 
 const HomePage = () => {
-  const [tasks, setTasks] = useState([]);
+const [tasks, setTasks] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -21,7 +21,7 @@ const HomePage = () => {
   const [showQuickAdd, setShowQuickAdd] = useState(false);
   const [newTask, setNewTask] = useState({
     title: '',
-    categoryId: 'work',
+    categoryId: 'general',
     priority: 'medium',
     dueDate: ''
   });
@@ -33,8 +33,8 @@ const HomePage = () => {
   const loadData = async () => {
     setLoading(true);
     setError(null);
-    try {
-      const [tasksData, categoriesData] = await Promise.all([
+try {
+const [tasksData, categoriesData] = await Promise.all([
         taskService.getAll(),
         categoryService.getAll()
       ]);
@@ -70,14 +70,14 @@ const handleCreateTask = async (e) => {
     e.preventDefault();
     if (!newTask.title.trim()) return;
 
-    try {
+try {
       const task = await taskService.create({
         ...newTask,
         categoryId: newTask.categoryId,
         dueDate: newTask.dueDate ? new Date(newTask.dueDate).toISOString() : null
       });
       setTasks(prev => [...prev, task]);
-      setNewTask({ title: '', categoryId: 'work', priority: 'medium', dueDate: '' });
+      setNewTask({ title: '', categoryId: 'general', priority: 'medium', dueDate: '' });
       setShowQuickAdd(false);
       toast.success('Task created successfully!');
     } catch (err) {
@@ -86,7 +86,7 @@ const handleCreateTask = async (e) => {
   };
 
 const handleDeleteTask = async (taskId) => {
-    try {
+try {
       await taskService.delete(taskId);
       setTasks(prev => prev.filter(task => (task.Id || task.id) !== taskId));
       toast.success('Task deleted');

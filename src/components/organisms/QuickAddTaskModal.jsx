@@ -27,7 +27,7 @@ const categoryOptions = categories.map(cat => ({ value: cat.Id || cat.id, label:
                     <FormField
                         label="Category"
                         type="select"
-                        value={newTask.categoryId}
+value={newTask.categoryId}
                         onChange={(e) => onNewTaskChange('categoryId', e.target.value)}
                         options={categoryOptions}
                     />
